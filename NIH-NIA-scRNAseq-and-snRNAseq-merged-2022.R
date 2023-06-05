@@ -1,3 +1,6 @@
+##### Single cell analysis ####
+
+##### Import libraries #####
 library(rliger)
 library(liger)
 library(Seurat)
@@ -13,33 +16,31 @@ library(edgeR)
 
 ###snRNAseq analysis from multi-omics dataset
 ###We extracted count data with july option 
+###scRNAseq data
+iNSC_P<-Read10X("./single-cell-intron/iNSC-P-intron/outs/filtered_feature_bc_matrix/") #DR5a
+iNSC_S<-Read10X("./single-cell-intron/iNSC-S-intron/outs/filtered_feature_bc_matrix/") #103
+iNSC_P0<-Read10X("./single-cell-intron/IB4-111-intron/outs/filtered_feature_bc_matrix/")
+iNSC_S0<-Read10X("./single-cell-intron/IB4-113-intron/outs/filtered_feature_bc_matrix/")
+###snRNAseq data batch1
+iNSC_P1<-Read10X("./iNSC-scRNA-scATAC/example2/outs/filtered_feature_bc_matrix/") #DR5a-Healthy
+iNSC_S1<-Read10X("./iNSC-scRNA-scATAC/example5/outs/filtered_feature_bc_matrix/") # 103-PMS
+iNSC_S2<-Read10X("./iNSC-scRNA-scATAC/example4/outs/filtered_feature_bc_matrix/") #113-PMS
+###snRNAseq data batch2
+iNSC_P2<-Read10X("./iNSC-scRNA-scATAC/IB6-111-intron/outs/filtered_feature_bc_matrix/") #111-Healthy
+iNSC_S3<-Read10X("./iNSC-scRNA-scATAC/IB6-102-intron/outs/filtered_feature_bc_matrix/") #102-PMS2
 
-setwd("~/Dropbox/Desktop/analysis/single-cell-brain-2022")
-setwd("~/Dropbox/Desktop/analysis/single-cell-brain-2022")
-iNSC_P<-Read10X("/Users/bongsoopark/Library/CloudStorage/OneDrive-Personal/single-cell-intron/iNSC-P-intron/outs/filtered_feature_bc_matrix/")
-iNSC_S<-Read10X("/Users/bongsoopark/Library/CloudStorage/OneDrive-Personal/single-cell-intron/iNSC-S-intron/outs/filtered_feature_bc_matrix/")
-iNSC_P0<-Read10X("/Users/bongsoopark/Library/CloudStorage/OneDrive-Personal/single-cell-intron/IB4-111-intron/outs/filtered_feature_bc_matrix/")
-iNSC_S0<-Read10X("/Users/bongsoopark/Library/CloudStorage/OneDrive-Personal/single-cell-intron/IB4-113-intron/outs/filtered_feature_bc_matrix/")
-iNSC_P1<-Read10X("/Volumes/Samsung_T5/NIH-Beerman-lab/iNSC-scRNA-scATAC/example2/outs/filtered_feature_bc_matrix/")
-iNSC_S1<-Read10X("/Volumes/Samsung_T5/NIH-Beerman-lab/iNSC-scRNA-scATAC/example5/outs/filtered_feature_bc_matrix/")
-iNSC_P2<-Read10X("./IB6-111-intron/outs/filtered_feature_bc_matrix/")
-iNSC_S2<-Read10X("/Volumes/Samsung_T5/NIH-Beerman-lab/iNSC-scRNA-scATAC/example4/outs/filtered_feature_bc_matrix/")
-#iNSC_P3<-Read10X("/Volumes/Samsung_T5/NIH-Beerman-lab/iNSC-scRNA-scATAC/example3/outs/filtered_feature_bc_matrix/")
-iNSC_S3<-Read10X("./IB6-102-intron/outs/filtered_feature_bc_matrix/")
+# Basic filterring process
+iNSC_P <- CreateSeuratObject(counts = iNSC_P, project = "iNSC",min.features=1000,min.cells=3)   
+iNSC_S <- CreateSeuratObject(counts = iNSC_S, project = "iNSC",min.features=1000,min.cells=3)   
+iNSC_P0 <- CreateSeuratObject(counts = iNSC_P0, project = "iNSC",min.features=1000,min.cells=3)   
+iNSC_S0 <- CreateSeuratObject(counts = iNSC_S0, project = "iNSC",min.features=1000,min.cells=3)   
+iNSC_P1 <- CreateSeuratObject(counts = iNSC_P1[["Gene Expression"]], project = "iNSC",min.features=1000,min.cells=3)   
+iNSC_S1 <- CreateSeuratObject(counts = iNSC_S1[["Gene Expression"]], project = "iNSC",min.features=1000,min.cells=3)   
+iNSC_S2 <- CreateSeuratObject(counts = iNSC_S2[["Gene Expression"]], project = "iNSC",min.features=1000,min.cells=3)
+iNSC_P2 <- CreateSeuratObject(counts = iNSC_P2, project = "iNSC",min.features=1000,min.cells=3)   
+iNSC_S3 <- CreateSeuratObject(counts = iNSC_S3, project = "iNSC",min.features=1000,min.cells=3)   
 
-setwd("~/Dropbox/Desktop/analysis/single-cell-brain-2022")
-
-iNSC_P <- CreateSeuratObject(counts = iNSC_P, project = "iNSC",min.features=1000,min.cells=3)   ###16406 features, 6661 cells
-iNSC_S <- CreateSeuratObject(counts = iNSC_S, project = "iNSC",min.features=1000,min.cells=3)   ###15476 features, 2339 cells
-iNSC_P0 <- CreateSeuratObject(counts = iNSC_P0, project = "iNSC",min.features=1000,min.cells=3)   ###16406 features, 6661 cells
-iNSC_S0 <- CreateSeuratObject(counts = iNSC_S0, project = "iNSC",min.features=1000,min.cells=3)   ###15476 features, 2339 cells
-iNSC_P1 <- CreateSeuratObject(counts = iNSC_P1[["Gene Expression"]], project = "iNSC",min.features=1000,min.cells=3)   ###16406 features, 6661 cells
-iNSC_S1 <- CreateSeuratObject(counts = iNSC_S1[["Gene Expression"]], project = "iNSC",min.features=1000,min.cells=3)   ###15476 features, 2339 cells
-iNSC_P2 <- CreateSeuratObject(counts = iNSC_P2, project = "iNSC",min.features=1000,min.cells=3)   ###16406 features, 6661 cells
-iNSC_S2 <- CreateSeuratObject(counts = iNSC_S2[["Gene Expression"]], project = "iNSC",min.features=1000,min.cells=3)   ###15476 features, 2339 cells
-#iNSC_P3 <- CreateSeuratObject(counts = iNSC_P3[["Gene Expression"]], project = "iNSC",min.features=1000,min.cells=3)   ###15476 features, 2339 cells
-iNSC_S3 <- CreateSeuratObject(counts = iNSC_S3, project = "iNSC",min.features=1000,min.cells=3)   ###16406 features, 6661 cells
-
+# Meta data
 iNSC_P@meta.data[,"Treatment"]<-"Healthy"
 iNSC_S@meta.data[,"Treatment"]<-"MS"
 iNSC_P0@meta.data[,"Treatment"]<-"Healthy"
@@ -48,7 +49,6 @@ iNSC_P1@meta.data[,"Treatment"]<-"Healthy"
 iNSC_S1@meta.data[,"Treatment"]<-"MS"
 iNSC_P2@meta.data[,"Treatment"]<-"Healthy"
 iNSC_S2@meta.data[,"Treatment"]<-"MS"
-#iNSC_P3@meta.data[,"Treatment"]<-"Healthy"
 iNSC_S3@meta.data[,"Treatment"]<-"MS"
 
 iNSC_P@meta.data[,"Replicate"]<-"1"
@@ -59,7 +59,6 @@ iNSC_P1@meta.data[,"Replicate"]<-"1"
 iNSC_S1@meta.data[,"Replicate"]<-"1"
 iNSC_P2@meta.data[,"Replicate"]<-"1"
 iNSC_S2@meta.data[,"Replicate"]<-"1"
-#iNSC_P3@meta.data[,"Replicate"]<-"1"
 iNSC_S3@meta.data[,"Replicate"]<-"1"
 
 iNSC_P@meta.data[,"ID"]<-"scDR5a"
@@ -70,7 +69,6 @@ iNSC_P1@meta.data[,"ID"]<-"snDR5a"
 iNSC_S1@meta.data[,"ID"]<-"sn103_8"
 iNSC_P2@meta.data[,"ID"]<-"sn111_v2"
 iNSC_S2@meta.data[,"ID"]<-"sn113_7g"
-#iNSC_P3@meta.data[,"ID"]<-"snBJ"
 iNSC_S3@meta.data[,"ID"]<-"sn102_3"
 
 iNSC_P@meta.data[,"Method"]<-"scRNAseq"
@@ -81,7 +79,6 @@ iNSC_P1@meta.data[,"Method"]<-"snRNAseq"
 iNSC_S1@meta.data[,"Method"]<-"snRNAseq"
 iNSC_P2@meta.data[,"Method"]<-"snRNAseq"
 iNSC_S2@meta.data[,"Method"]<-"snRNAseq"
-#iNSC_P3@meta.data[,"Method"]<-"snRNAseq"
 iNSC_S3@meta.data[,"Method"]<-"snRNAseq"
 
 iNSC_P@meta.data[,"ID2"]<-"DR5a"
@@ -92,7 +89,6 @@ iNSC_P1@meta.data[,"ID2"]<-"DR5a"
 iNSC_S1@meta.data[,"ID2"]<-"103_8"
 iNSC_P2@meta.data[,"ID2"]<-"111"
 iNSC_S2@meta.data[,"ID2"]<-"113_7g"
-#iNSC_P3@meta.data[,"ID2"]<-"BJ"
 iNSC_S3@meta.data[,"ID2"]<-"102_3"
 
 WD<-merge(x=iNSC_P,y=list(iNSC_S,iNSC_P0,iNSC_S0,iNSC_P1,iNSC_S1,iNSC_P2,iNSC_S2,iNSC_S3), add.cell.ids=c("iNSC_P","iNSC_S","iNSC_P0","iNSC_S0","iNSC_P1","iNSC_S1","iNSC_P2","iNSC_S2","iNSC_S3"),project="BRAIN")
@@ -145,10 +141,6 @@ metadata <- metadata %>%
                 nGene = nFeature_RNA)
 
 # Create sample column
-metadata$sample <- NA
-metadata$sample[which(str_detect(metadata$Treatment, "^Young"))] <- "Young-BM"
-metadata$sample[which(str_detect(metadata$Treatment, "^Old"))] <- "Old-BM"
-
 View(metadata)
 
 # Visualize the number of cell counts per sample
@@ -225,18 +217,19 @@ saveRDS(WD,file="metadata-integrated-2022-scRNAseq-raw.rds")
 WD <- readRDS(file="metadata-integrated-2022-scRNAseq-raw.rds")
 
 # Filter out low quality reads using selected thresholds - these will change with experiment
+# Python package SCVI (generating the doublet ranking top to bottom, exclude only 5% top doublet candidate cells
 metadata_before_filter <- read.table(file="metadata-integrated-2022-scRNAseq.csv-doublet.csv",sep=",",header=TRUE)
 rownames(metadata_before_filter) <- metadata_before_filter$name
 WD@meta.data <- metadata_before_filter
 
-# stringent filter
+# stringent filter test #1
 filtered_seurat <- subset(x = WD, 
                           subset= (nUMI >= 10000) & 
                             (nGene >= 1000) & 
                             (log10GenesPerUMI > 0.80) & 
                             (mitoRatio < 0.20))
 
-# relaxed filter 10/31/2022
+# relaxed filter 10/31/2022, current version (to increase # of downstream cells)
 filtered_seurat <- subset(x = WD, 
                           subset= (nUMI >= 8000) & 
                             (nGene >= 1000) & 
@@ -248,7 +241,7 @@ filtered_seurat <- subset(x = WD,
 #30525 features across 32446 samples within 1 assay 
 #Active assay: RNA (30525 features, 2000 variable features)
 #2 dimensional reductions calculated: pca, umap
-
+# Python package SCVI (generating the doublet ranking top to bottom, exclude only 5% top doublet candidate cells
 metadata <- read.table(file="metadata-integrated-harmony2-doublet2.csv",sep=",",header=TRUE)
 rownames(metadata) <- metadata$name
 
@@ -274,250 +267,109 @@ WD <- filtered_seurat
 library(cowplot)
 library(harmony)
 options(repr.plot.height = 2.5, repr.plot.width = 6)
-pbmc <- WD %>% 
+integrated <- WD %>% 
   RunHarmony("ID", plot_convergence = TRUE)
 
 # To directly access the new Harmony embeddings, use the Embeddings command.
-harmony_embeddings <- Embeddings(pbmc, 'harmony')
+harmony_embeddings <- Embeddings(integrated, 'harmony')
 harmony_embeddings[1:5, 1:5]
 
 # Let's make sure that the datasets are well integrated in the first 2 dimensions after Harmony.
 options(repr.plot.height = 5, repr.plot.width = 12)
-p1 <- DimPlot(object = pbmc, reduction = "harmony", pt.size = .1, group.by = "ID")
-p2 <- VlnPlot(object = pbmc, features = "harmony_1", group.by = "ID", pt.size = .0)
+p1 <- DimPlot(object = integrated, reduction = "harmony", pt.size = .1, group.by = "ID")
+p2 <- VlnPlot(object = integrated, features = "harmony_1", group.by = "ID", pt.size = .0)
 plot_grid(p1,p2)
 
-pbmc <- pbmc %>% 
+integrated <- integrated %>% 
   RunUMAP(reduction = "harmony", dims = 1:20) %>% 
   FindNeighbors(reduction = "harmony", dims = 1:20) %>% 
   FindClusters(resolution = 0.3) %>% 
   identity()
 
 options(repr.plot.height = 4, repr.plot.width = 10)
-DimPlot(pbmc, reduction = "umap", group.by = "ID2", pt.size = .5, split.by = 'ID2')
+DimPlot(integrated, reduction = "umap", group.by = "ID2", pt.size = .5, split.by = 'ID2')
 
 options(repr.plot.height = 4, repr.plot.width = 10)
-DimPlot(pbmc, reduction = "umap", group.by = "Treatment", pt.size = .5, split.by = 'Treatment')
+DimPlot(integrated, reduction = "umap", group.by = "Treatment", pt.size = .5, split.by = 'Treatment')
 
 options(repr.plot.height = 4, repr.plot.width = 6)
-p1 <- DimPlot(object = pbmc, reduction = "umap", pt.size = .5, group.by = "ID")
-p2 <- DimPlot(pbmc, reduction = "umap", label = TRUE, pt.size = .5)
+p1 <- DimPlot(object = pintegrated, reduction = "umap", pt.size = .5, group.by = "ID")
+p2 <- DimPlot(integrated, reduction = "umap", label = TRUE, pt.size = .5)
 plot_grid(p1,p2)
 
 # adding UMAP information
-metadata <- pbmc@meta.data
-metadata2 <- data.frame(pbmc[["umap"]]@cell.embeddings)
-pbmc@meta.data <- cbind(metadata, metadata2)
-
-# v1: original v2: excluding BJ? v3: relaxed testing: 10/31/2022 - I like it
-write.table(metadata, file="metadata-integrated-harmony3.csv",sep=",")
-metadata <- read.table(file="metadata-integrated-harmony3.csv",sep=",")
+metadata <- integrated@meta.data
+metadata2 <- data.frame(integrated[["umap"]]@cell.embeddings)
+integrated@meta.data <- cbind(metadata, metadata2)
 
 # 10/31/2022 updated/ removal of doublet cells (<10%)
 # Ver2 second relaxed version
-saveRDS(pbmc,file="metadata-integrated-2022-scRNAseq-harmony-singlet.rds")
-write.csv(pbmc@meta.data, file="metadata-integrated-2022-scRNAseq-harmony-singlet.csv")
-pbmc <- readRDS(file="metadata-integrated-2022-scRNAseq-harmony-singlet.rds")
+saveRDS(integrated_singlet,file="metadata-integrated-2022-scRNAseq-harmony-singlet.rds")
+write.csv(iintegrated_singlet@meta.data, file="metadata-integrated-2022-scRNAseq-harmony-singlet.csv")
+integrated_singlet <- readRDS(file="metadata-integrated-2022-scRNAseq-harmony-singlet.rds")
 
 ###################################################################3
-saveRDS(pbmc,file="metadata-integrated-2022-scRNAseq-harmony.rds")
-WD.brain <- readRDS(file="metadata-integrated-2022-scRNAseq-harmony.rds")
-WD.brain@meta.data <- read.table(file="metadata-integrated-harmony2.csv",sep=",")
-WD.brain@meta.data <- read.table(file="metadata-integrated-harmony2-doublet.csv",sep=",")
-
-# Original stringent version
-pbmc <- readRDS(file="metadata-integrated-2022-scRNAseq-harmony.rds")
-pbmc@meta.data <- read.table(file="metadata-integrated-harmony2-doublet2.csv",sep=",",header=TRUE)
-
+#Downstream visualisation doublt/singlet test old version
+###################################################################3
 # this error fixed after importing tidyverse library
 # Error: Must request at least one colour from a hue palette.
 library(tidyverse)
 library(ggplot2)
 
-DimPlot(pbmc, reduction = "umap", group.by = "ID2", pt.size = .5, split.by = 'ID2')
-DimPlot(pbmc, reduction = "umap", group.by = "seurat_clusters", pt.size = .5, split.by ="seurat_clusters")
-DimPlot(pbmc, reduction = "umap", group.by = "doublet", pt.size = .1, split.by = 'doublet')
+DimPlot(integrated, reduction = "umap", group.by = "ID2", pt.size = .5, split.by = 'ID2')
+DimPlot(integrated, reduction = "umap", group.by = "seurat_clusters", pt.size = .5, split.by ="seurat_clusters")
+DimPlot(integrated, reduction = "umap", group.by = "doublet", pt.size = .1, split.by = 'doublet')
 
-
-Idents(object=pbmc)
-levels(x = pbmc)
+Idents(object=integrated)
+levels(x = integrated)
 
 ###Visualize markers by cluster
-Idents(object=pbmc)<-"doublet"
-#SetIdent(pbmc, value="doublet")
+Idents(object=integrated)<-"doublet"
+Idents(object=integrated)
+levels(x = integrated)
 
-Idents(object=pbmc)
-levels(x = pbmc)
+integrated_singlet <- subset(x = integrated, idents = "singlet")
+integrated_singlet@meta.data <- read.table(file="metadata-integrated-harmony2-singlet2.csv",sep=",",header=TRUE)
 
-pbmc_singlet <- subset(x = pbmc, idents = "singlet")
-pbmc_singlet@meta.data <- read.table(file="metadata-integrated-harmony2-singlet2.csv",sep=",",header=TRUE)
+Idents(object=integrated_singlet)<-"seurat_clusters"
 
-Idents(object=pbmc_singlet)<-"seurat_clusters"
-
-DimPlot(pbmc, reduction = "umap", group.by = "ID2", pt.size = .5, split.by = 'ID2')
-DimPlot(pbmc_singlet, reduction = "umap", group.by = "doublet", pt.size = .1, split.by = 'doublet')
-DimPlot(pbmc, reduction = "umap", label = TRUE)
+DimPlot(integrated, reduction = "umap", group.by = "ID2", pt.size = .5, split.by = 'ID2')
+DimPlot(integrated_singlet, reduction = "umap", group.by = "doublet", pt.size = .1, split.by = 'doublet')
+DimPlot(integrated, reduction = "umap", label = TRUE)
 
 options(repr.plot.height = 4, repr.plot.width = 6)
 p1 <- DimPlot(pbmc, reduction = "umap", group.by = "ID2", label = TRUE, pt.size = .5)
 p2 <- DimPlot(pbmc, reduction = "umap", group.by = "ID2", label = TRUE, pt.size = .5)
 plot_grid(p1,p2)
 
+###################################################################3
+#Downstream visualisation doublt/singlet test old version
+###################################################################3
 # Very nice feature RidgePlot generation key genes
 features <- c( "NES", "SOX2", "HES6", "YBX1","PAX6", "DACH1","IFIT1","IFIT3")
-RidgePlot(pbmc, features = features, ncol = 3)
+RidgePlot(integrated_singlet, features = features, ncol = 3)
 
 library(shiny)
 library(Seurat)
 library(ShinyCell)
 
-pbmc[["umap"]]@cell.embeddings
+integrated_singlet[["umap"]]@cell.embeddings
 
 #DefaultAssay(pbmc) <- 'RNA'
-Idents(object=pbmc)<-"seurat_clusters"
-#pbmc <- subset(x = pbmc, idents = c("0","1","2","3","4","5","6","7","8","9"))
+Idents(object=integrated_singlet)<-"seurat_clusters"
+integrated_singlet <- subset(x = integrated_singlet, idents = c("0","1","2","3","4","5","6","7","8","9"))
 
-#scConf = createConfig(pbmc, meta.to.include=c("RNA_snn_res.0.5","seurat_clusters","Method","ID","ID2","sampleID"))
-scConf = createConfig(pbmc)
-makeShinyApp(pbmc, scConf, gene.mapping = TRUE,
+# excluding cluster 10,11 small cluster, specific to the one sample 
+scConf = createConfig(integrated_singlet)
+makeShinyApp(integrated_singlet, scConf, gene.mapping = TRUE,
              shiny.title = "iNSC (MS vs Healthy)")
 
-# WARNING: Sketch indices returned by geosketch are 0-indexed but R
-# uses 1-indexing; indices should be shifted by 1 by setting
-# `one_indexed = TRUE` for any downstream analysis.
-# Jul5, performing scketch error due to python 
-use_python("/opt/anaconda3/bin/python")
-library(reticulate)
-library(rsvd)
-
-geosketch <- import('geosketch')
-
-# Generate some random data.
-X <- replicate(20, rnorm(1000))
-
-# Get top PCs from randomized SVD.
-s <- rsvd(X, k=10)
-X.pcs <- s$u %*% diag(s$d)
-
-# Sketch 10% of data.
-sketch.size <- as.integer(100)
-sketch.indices <- geosketch$gs(X.pcs, sketch.size, one_indexed = TRUE)
-print(sketch.indices)
-
-# Batch correction
-# Tutorial
-# https://broadinstitute.github.io/2020_scWorkshop/batch-correction-lab.html
-
-var.genes <- SelectIntegrationFeatures(SplitObject(WD, split.by = "ID"), nfeatures = 2000, verbose = TRUE, fvf.nfeatures = 2000, selection.method = "vst")
-VariableFeatures(WD) <- var.genes
-WD <- ScaleData(WD, features=VariableFeatures(WD))
-WD <- RunPCA(WD, features=VariableFeatures(WD), npcs=40, ndims.print = 1:5, nfeatures.print = 5)
-DimPlot(WD, reduction = "pca", dims = c(1, 2), group.by = "ID")
-WD <- FindNeighbors(WD, reduction = "pca", dims= 1:20, k.param=20)
-WD <- FindClusters(WD, resolution=0.8, algorithm=1, random.seed=100)
-# Create a UMAP visualization. 
-WD <- RunUMAP(WD, dims = 1:20, reduction = "pca", n.neighbors = 15, min.dist = 0.5, spread = 1, metric = "euclidean", seed.use = 1)  
-# Visualize the Louvain clustering and the batches on the UMAP. 
-# Remember, the clustering is stored in @meta.data in column seurat_clusters and the technology is
-# stored in the column tech. Remember you can also use DimPlot
-DimPlot(WD, reduction = "umap", group.by = "seurat_clusters")
-DimPlot(WD, reduction = "umap", group.by = "ID")
-# CCA integration (Original version)
-WD.list<-SplitObject(object = WD, split.by = "ID")
-
-for (i in 1:length(x = WD.list)) {
-  WD.list[[i]] <- NormalizeData(object = WD.list[[i]], verbose = FALSE)
-  WD.list[[i]] <- FindVariableFeatures(object = WD.list[[i]], 
-                                       selection.method = "vst", nfeatures = 2000, verbose = FALSE)
-}
-
-WD.anchors <- FindIntegrationAnchors(object.list = WD.list, dims = 1:30)
-WD.brain <- IntegrateData(anchorset = WD.anchors, dims = 1:30)
-
-DefaultAssay(object = WD.brain) <- "integrated"
-WD.brain <- ScaleData(object = WD.brain, do.center=T, do.scale=F, verbose = FALSE)
-WD.brain <- RunPCA(object = WD.brain, npcs = 30, verbose = FALSE, nfeatures.print = 5)
-DimPlot(WD, dims = c(1, 2), reduction = "pca", split.by = "ID")
-
-WD.brain <- FindNeighbors(object = WD.brain, reduction = "pca", dims = 1:20, k.param = 20)
-WD.brain <- FindClusters(object = WD.brain, resolution=0.8)
-WD.brain <- RunUMAP(object = WD.brain, reduction = "pca", 
-                    dims = 1:30)
-p1 <- DimPlot(object = WD.brain, reduction = "umap", group.by = "ID")
-p2 <- DimPlot(object = WD.brain, reduction = "umap", group.by = "Treatment")
-p3 <- DimPlot(object = WD.brain, reduction = "umap", group.by = "seurat_clusters", 
-              label = TRUE, repel = TRUE) 
-plot_grid(p1, p2, p3)
-
-options(repr.plot.height = 4, repr.plot.width = 10)
-DimPlot(WD.brain, reduction = "umap", group.by = "seurat_clusters", pt.size = .2, split.by = 'Treatment')
-
-options(repr.plot.height = 4, repr.plot.width = 10)
-DimPlot(WD.brain, reduction = "umap", group.by = "ID", pt.size = .2, split.by = 'ID')
-
-saveRDS(WD.brain,file="metadata-july-2022-scRNAseq-cca.rds")
-WD.brain <= readRDS(file="metadata-july-2022-scRNAseq-cca.rds")
-
-###Switch to the integrated data for downstream analyses
-DefaultAssay(object = WD.brain) <- "integrated"
-
-###Calculate % mitochondrial
-WD[["percent.mt"]] <- PercentageFeatureSet(WD, pattern = "^MT-")
-summary(WD[["percent.mt"]])  ###Looks pretty good! Low % mito
-
-WD <- SCTransform(WD, verbose = FALSE)
-WD <- RunPCA(WD, npcs = 100, ndims.print = 1:5, nfeatures.print = 5)  
-WD <- RunUMAP(WD, dims = 1:30, verbose = FALSE)
-
-ElbowPlot(WD, ndims = 100) ###First elbow around 25 PCs, not much additional variance around 50 PCs or so
-DimHeatmap(WD, dims = c(1:9), cells = 500, balanced = TRUE)
-
-WD <- FindNeighbors(object = WD , dims = 1:20, verbose = FALSE)
-WD  <- FindClusters(object = WD , verbose = FALSE)
-
-WD.list<-SplitObject(object = WD, split.by = "ID")
-
-for (i in 1:length(x = WD.list)) {
-  WD.list[[i]] <- NormalizeData(object = WD.list[[i]], verbose = FALSE)
-  WD.list[[i]] <- FindVariableFeatures(object = WD.list[[i]], 
-                                       selection.method = "vst", nfeatures = 2000, verbose = FALSE)
-}
-
-features <- SelectIntegrationFeatures(object.list = WD.list)
-reference.list <- PrepSCTIntegration(object.list = WD.list, anchor.features = features)
-
-WD.anchors <- FindIntegrationAnchors(object.list = reference.list, normalization.method = "SCT",
-                                     anchor.features = features)
-
-WD.brain <- IntegrateData(anchorset = WD.anchors, normalization.method = "SCT")
-WD.brain <- RunPCA(WD.brain, npcs = 100, ndims.print = 1:5, nfeatures.print = 5)  
-WD.brain <- RunUMAP(WD.brain, dims = 1:30, verbose = FALSE)
-WD.brain <- FindNeighbors(object = WD , dims = 1:20, verbose = FALSE)
-WD.brain  <- FindClusters(object = WD , verbose = FALSE)
-
-p1 <- DimPlot(object = WD.brain, reduction = "umap", group.by = "ID")
-p2 <- DimPlot(object = WD.brain, reduction = "umap", group.by = "Treatment")
-p3 <- DimPlot(object = WD.brain, reduction = "umap", group.by = "seurat_clusters", 
-              label = TRUE, repel = TRUE) 
-plot_grid(p1, p2, p3)
-
-DefaultAssay(object = WD.breast) <- "integrated"
-DefaultAssay(object = WD) <- "RNA"
+WD.brain <- readRDS(file="metadata-integrated-2022-scRNAseq-harmony-singlet.rds")
 
 ###Normalize and find variable features
-###Are there differences in cluster identify by treatment?
-table(WD.brain@meta.data$ID,WD.brain@meta.data$seurat_clusters)  ###Looks like there's more BreastCancer in cluster2?
+table(WD.brain@meta.data$ID,WD.brain@meta.data$seurat_clusters) 
 t(round(prop.table(table(WD.brain@meta.data$Treatment,WD.brain@meta.data$seurat_clusters),margin=1),4))
 cbind(t(round(prop.table(table(WD.brain@meta.data$Treatment,WD.brain@meta.data$seurat_clusters),margin=1),4)))
-c<-cbind(t(round(prop.table(table(WD.brain@meta.data$Treatment,WD.brain@meta.data$seurat_clusters),margin=1),4)))
-b<-cbind(t(round(prop.table(table(WD.brain@meta.data$ID,WD.brain@meta.data$seurat_clusters),margin=1),4)))
-b<-as.data.frame(b)
-library(data.table)
-b<-transpose(b)
-colnames(b)<-c("0","1","2","3","4","5","6","7","8","9","10","11","12",
-               "13","14","15","16","17")
-write.table(b,file="~/Desktop/temp.csv",sep=",")
-# New code 4/7/2020
 test<-chisq.test(table(WD.brain@meta.data$seurat_clusters==0, WD.brain@meta.data$Treatment))
 str(test)
 chi.res<-data.frame(mat.or.vec(17,3))
@@ -700,38 +552,9 @@ DoHeatmap(WD.brain, features = gene_of_interest)
 VariableFeatures(WD) <- var.genes
 WD.brain <- ScaleData(WD.brain, features=VariableFeatures(WD.brain))
 
-#WD.cluster.markers <- FindAllMarkers(WD.brain, only.pos = FALSE, logfc.threshold = 0.5)
 write.csv(WD.brain.markers,file="NIH-NIA-scRNAseq-and-snRNAseq.markers.csv")
 write.csv(WD.brain.markers,file="NIH-NIA-scRNAseq-and-snRNAseq.markers-singlet.csv")
 write.csv(WD.brain.markers.all,file="NIH-NIA-scRNAseq-and-snRNAseq.markers-singlet-all.csv")
-
-library(Seurat)
-library(velocyto.R)
-library(SeuratWrappers)
-
-# If you don't have velocyto's example mouse bone marrow dataset, download with the CURL command
-# curl::curl_download(url = 'http://pklab.med.harvard.edu/velocyto/mouseBM/SCG71.loom', destfile
-# = '~/Downloads/SCG71.loom')
-ldat <- ReadVelocity(file = "SCG71.loom")
-bm <- as.Seurat(x = ldat)
-bm <- SCTransform(object = bm, assay = "spliced")
-bm <- RunPCA(object = bm, verbose = FALSE)
-bm <- FindNeighbors(object = bm, dims = 1:20)
-bm <- FindClusters(object = bm)
-bm <- RunUMAP(object = bm, dims = 1:20)
-
-#bm <- readRDS(file="NIH-NIA-cluster-Nov-11-2021-monkey-integrated2.rds")
-bm <- RunVelocity(object = bm, deltaT = 1, kCells = 25, fit.quantile = 0.02)
-ident.colors <- (scales::hue_pal())(n = length(x = levels(x = bm)))
-names(x = ident.colors) <- levels(x = bm)
-cell.colors <- ident.colors[Idents(object = bm)]
-names(x = cell.colors) <- colnames(x = bm)
-pdf(file = "velocity.pdf", width = 8, height = 8)
-show.velocity.on.embedding.cor(emb = Embeddings(object = bm, reduction = "umap"), vel = Tool(object = bm, 
-                                                                                             slot = "RunVelocity"), n = 200, scale = "sqrt", cell.colors = ac(x = cell.colors, alpha = 0.5), 
-                               cex = 0.4, arrow.scale = 3, show.grid.flow = TRUE, min.grid.cell.mass = 0.5, grid.n = 40, arrow.lwd = 1, 
-                               do.par = FALSE, cell.border.alpha = 0.1)
-dev.off()
 
 ##############3 Velocity Analysis Preparation ##################
 
